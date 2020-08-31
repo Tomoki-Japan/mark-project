@@ -1,45 +1,67 @@
-// ユーザープールの設定
 const poolData = {
-    UserPoolId : "us-east-1_YPh5qwkdm",
-    ClientId : "59da7brj3hoh0mtmomqvaq50h4"
+    UserPoolId: "us-east-1_YPh5qwkdm",
+    ClientId: "59da7brj3hoh0mtmomqvaq50h4",
 };
 const userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+const cognitoUser = userPool.getCurrentUser();  // 現在のユーザー
+
+var currentUserData = {};  // ユーザーの属性情報
 
 /**
  * 画面読み込み時の処理
  */
-$(document).ready(function() {
+$(document).ready(function () {
 
-	// Amazon Cognito 認証情報プロバイダーの初期化
-	AWSCognito.config.region = 'ap-northeast-1'; // リージョン
-	AWSCognito.config.credentials = new AWS.CognitoIdentityCredentials({
-	    IdentityPoolId: "us-east-1:72c4bfe5-e74b-4a5c-9c0a-b96ad755ccde"
-	});
+    // Amazon Cognito 認証情報プロバイダーの初期化
+    AWSCognito.config.region = 'ap-northeast-1'; // リージョン
+    AWSCognito.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: "us-east-1:72c4bfe5-e74b-4a5c-9c0a-b96ad755ccde",
+    });
 
-	// 「Sign In」ボタン押下時
-	$("#signinButton").click(function(event) {
-		signIn();
-	});
+    // 「Sign Out」ボタン押下時
+    $("#signoutButton").click(function (event) {
+        signOut();
+    });
 });
 
 /**
- * サインイン処理
+ * 現在のユーザーの属性情報を取得・表示する
  */
-var signIn = function() {
-    var email = $('#email').val();
-    var password = $('#password').val();
+var getUserAttribute = function () {
+    $("div#menu h4").text("ようこそ！" + "さん");
+    // 現在のユーザー情報が取得できているか？
+    if (cognitoUser != null) {
+        cognitoUser.getSession(function (err, session) {
+            if (err) {
+                console.log(err);
+                $(location).attr("href", "signin.html");
+            } else {
+                // ユーザの属性を取得
+                cognitoUser.getUserAttributes(function (err, result) {
+                    if (err) {
+                        $(location).attr("href", "signin.html");
+                    }
 
-    // 何か1つでも未入力の項目がある場合、メッセージを表示して処理を中断
-    if (!email | !password) {
-    	$("#signin div#message span").empty();
-    	$("#signin div#message span").append("All fields are required.");
-    	return false;
+                    // 取得した属性情報を連想配列に格納
+                    for (i = 0; i < result.length; i++) {
+                        currentUserData[result[i].getName()] = result[i].getValue();
+                    }
+                });
+            }
+        });
+    } else {
+        $(location).attr("href", "signout.html");
     }
+};
+
+var signOut = function () {
+    var email = currentUserData["email"];
+    var password = currentUserData["pasword"];
 
     // 認証データの作成
     var authenticationData = {
         Username: email,
-        Password: password
+        Password: password,
     };
     var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
 
@@ -47,30 +69,21 @@ var signIn = function() {
         Username: email,
         Pool: userPool
     };
+
+    /*
     var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    cognito.adminUserGlobalSignOut({
+        UserPoolId: userPoolId,
+        Username: username,
+    }).promise()
+    */
 
-    // 認証処理
-    cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: function (result) {
-            var idToken = result.getIdToken().getJwtToken();          // IDトークン
-            var accessToken = result.getAccessToken().getJwtToken();  // アクセストークン
-            var refreshToken = result.getRefreshToken().getToken();   // 更新トークン
 
-            console.log("idToken : " + idToken);
-            console.log("accessToken : " + accessToken);
-            console.log("refreshToken : " + refreshToken);
-            console.log('遷移します')
-
-            window.location.href = 'menu.html'
-
-            // サインイン成功の場合、次の画面へ遷移
-        },
-
-        onFailure: function(err) {
-            // サインイン失敗の場合、エラーメッセージを画面に表示
-            console.log(err);
-            $("div#message span").empty();
-            $("div#message span").append(err.message);
-        }
+    const signoutButton = document.getElementById("signout");
+    signoutButton.addEventListener("click", event => {
+        cognitoUser.signOut();
+        location.reload();
     });
-};
+    signoutButton.hidden = false;
+    console.log(currentUserData);
+}
