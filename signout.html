@@ -2,40 +2,36 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Activation</title>
+<title>Sign In</title>
 <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.css">
-<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script src="js/anime.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.3.3/semantic.min.js"></script>
 <script src="js/jsbn.js"></script>
 <script src="js/jsbn2.js"></script>
 <script src="js/sjcl.js"></script>
 <script src="js/aws-sdk.min.js"></script>
 <script src="js/aws-cognito-sdk.min.js"></script>
 <script src="js/amazon-cognito-identity.min.js"></script>
-<script src="js/activation.js"></script>
+<script src="js/signin.js"></script>
 <link rel="stylesheet" href="css/index.css">
-
-
-
 </head>
 <body>
     <div id="center-block" class="ui segment">
-    <div id="activation">
-        <h1>Activation</h1>
-        <div><span style="color: red;">All fields are required.</span></div>
-        <form name="form-activation" class="ui form">
+
+
+    <div id="signin">
+        <h1>Sign In</h1>
+        <div id="message"><span style="color: #ff0000;"></span></div>
+        <form name="form-signin" class="ui form">
             <span style="display: inline-block; width: 150px;">Email Address</span>
             <input type="text" id="email" placeholder="Email Address">
             <br/>
-            <span style="display: inline-block; width: 150px;">Activation Key</span>
-            <input type="text" id="activationKey" placeholder="Activation Key">
-            <br/><br/>
-            <button style="margin-top : 10px;"　type="button" id="activationButton" value="Activation" class="ui button">認証</button>
+            <span style="display: inline-block; width: 150px;">Password</span>
+            <input type="password" id="password" placeholder="Password">
+            <br/>
+            <button style="margin-top : 10px;" type="button" id="signinButton" value="Sign In" class="ui button">Sign In</button>
 	    </form>
     </div>
     </div>
-
-
 </body>
 </html>
